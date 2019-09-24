@@ -7,20 +7,21 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController : UITableViewController {
     
     var itemArr = [Item]();
     
-    // save and retrieve data
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist");
+    // in order to use persistentContainer in this file
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         
     override func viewDidLoad() {
         super.viewDidLoad();
         
-        print(dataFilePath!);
+        // path to where data is being stored
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask));
         
-        // calls decoder
         loadItems();
     };
     
@@ -47,10 +48,14 @@ class TodoListViewController : UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // print(itemArr[indexPath.row])
      
+        // cruD Delete data from core data has to be in this order
+        // context.delete(itemArr[indexPath.row]);
+        // itemArr.remove(at: indexPath.row);
+        
         // not operator
         itemArr[indexPath.row].done = !itemArr[indexPath.row].done;
         
-        // calls encoder
+        // crUd update data with core data 
         saveItems();
         
         tableView.deselectRow(at: indexPath, animated: true);
@@ -66,12 +71,12 @@ class TodoListViewController : UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) {
             (action) in
             
-            let newItem = Item();
+            let newItem = Item(context: self.context);
             newItem.title = textField.text!;
+            newItem.done = false;
             self.itemArr.append(newItem);
             print("Added New Item");
             
-            // calls encoder
             self.saveItems();
         };
         
@@ -87,29 +92,28 @@ class TodoListViewController : UITableViewController {
     };
     
     // MARK - Model Manipulation Methods
+    
+    // Crud Create/save data with core data
     func saveItems() {
-        let encoder = PropertyListEncoder();
-        
+       
         do {
-            let data = try encoder.encode(itemArr);
-            try data.write(to: dataFilePath!);
+            try context.save();
         } catch {
-            print("Error encoding item array, \(error)");
+            print("Error saving context, \(error)");
         };
         
         // must reload data to display the appended arr item on the tableView
         self.tableView.reloadData();
     };
     
+    // cRud Read from core data
     func loadItems() {
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder();
-            
-            do {
-                itemArr = try decoder.decode([Item].self, from: data);
-            } catch {
-                print("Error decoding item array, \(error)");
-            };
+        let request : NSFetchRequest<Item> = Item.fetchRequest();
+        
+        do {
+            itemArr = try context.fetch(request);
+        } catch {
+            print("Error fetching request, \(error)");
         };
     };
 };
