@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D6FDF00233C283500B2992E /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6FDEFF233C283500B2992E /* CategoryViewController.swift */; };
 		1DBABFB9232F670000BB2F02 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBABFB8232F670000BB2F02 /* AppDelegate.swift */; };
 		1DBABFBB232F670000BB2F02 /* TodoListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBABFBA232F670000BB2F02 /* TodoListViewController.swift */; };
 		1DBABFBE232F670000BB2F02 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1DBABFBC232F670000BB2F02 /* Main.storyboard */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1D6FDEFF233C283500B2992E /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
 		1DBABFB5232F670000BB2F02 /* Todo It.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Todo It.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DBABFB8232F670000BB2F02 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1DBABFBA232F670000BB2F02 /* TodoListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListViewController.swift; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 		1D7582AA2336CC9E00BFDAA8 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				1D6FDEFF233C283500B2992E /* CategoryViewController.swift */,
 				1DBABFBA232F670000BB2F02 /* TodoListViewController.swift */,
 			);
 			path = Controller;
@@ -291,6 +294,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D6FDF00233C283500B2992E /* CategoryViewController.swift in Sources */,
 				1DBCE9AE233ABB5D0013B854 /* DataModel.xcdatamodeld in Sources */,
 				1DBABFBB232F670000BB2F02 /* TodoListViewController.swift in Sources */,
 				1DBABFB9232F670000BB2F02 /* AppDelegate.swift in Sources */,
