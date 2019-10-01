@@ -7,20 +7,18 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class TodoListViewController : UITableViewController {
     
-    var itemArr = [Item]();
+    var todoItems : Results<Item>?;
+    let realm = try! Realm();
     
     var selectedCategory : Category? {
         didSet {
             loadItems();
         }
     };
-    
-    // in order to use persistentContainer in this file
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         
     override func viewDidLoad() {
         super.viewDidLoad();
@@ -34,39 +32,41 @@ class TodoListViewController : UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return itemArr.count;
+        return todoItems?.count ?? 1;
     };
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath);
         
-        let item  = itemArr[indexPath.row];
+        if let item  = todoItems?[indexPath.row] {
 
-        cell.textLabel?.text = item.title;
-        
-        cell.accessoryType = item.done ? .checkmark : .none;
-        
+            cell.textLabel?.text = item.title;
+            
+            cell.accessoryType = item.done ? .checkmark : .none;
+        } else {
+            cell.textLabel?.text = "No Items Added Yet";
+        };
         return cell;
     };
     
     // MARK: - Tableview Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // print(itemArr[indexPath.row])
-     
-        // cruD Delete data from core data has to be in this order
-        // context.delete(itemArr[indexPath.row]);
-        // itemArr.remove(at: indexPath.row);
+        // if not nil then try to save done status with realm in a do/catch block
+        // crUd update using realm
+        if let item = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    // realm.delete(item) // cruD delete using realm
+                    item.done = !item.done;
+                };
+            } catch {
+                print("Error saving done status, \(error)")
+            };
+        };
         
-        // not operator
-        itemArr[indexPath.row].done = !itemArr[indexPath.row].done;
-        
-        // crUd update data with core data 
-        saveItems();
-        
-        tableView.deselectRow(at: indexPath, animated: true);
-        
+        tableView.reloadData();
     };
     
     // MARK: - Add New Item
@@ -80,21 +80,27 @@ class TodoListViewController : UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) {
             (action) in
             
-            let newItem = Item(context: self.context);
-            newItem.title = textField.text!;
-            newItem.done = false;
-            // relationship in data model
-            newItem.parentCategory = self.selectedCategory;
-            self.itemArr.append(newItem);
-            print("Added New Item");
+            if let currentCategory = self.selectedCategory {
+                do {
+                    try self.realm.write {
+                        let newItem = Item();
+                        newItem.title = textField.text!;
+                        newItem.date = Date();
+                        currentCategory.items.append(newItem)
+                        print("Added New Item");
+                    };
+                } catch {
+                    print("Error saving new item, \(error)")
+                };
+            };
             
-            self.saveItems();
+            self.tableView.reloadData();
         };
         
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create New Item";
             textField = alertTextField;
-            alertTextField.autocapitalizationType = .sentences;
+            alertTextField.autocapitalizationType = .words;
             alertTextField.autocorrectionType = .yes;
         };
         
@@ -104,37 +110,25 @@ class TodoListViewController : UITableViewController {
     
     // MARK: - Data Manipulation Methods
     
-    // Crud Create/save data with core data
-    func saveItems() {
+    // Crud Create/save data using Realm
+    func save(item : Item) {
        
         do {
-            try context.save();
+            try realm.write {
+                realm.add(item)
+            }
         } catch {
-            print("Error saving context, \(error)");
+            print("Error saving item, \(error)");
         };
         
         // must reload data to display the appended arr item on the tableView
         self.tableView.reloadData();
     };
     
-    // cRud Read from core data
-    // internal with param and has default values
-    func loadItems(with request : NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil ) {
-        
-        // to load items for right category and using compound predicate with an optional default value to fix bug
-        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!);
-        
-        if let additionalPredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate]);
-        } else {
-            request.predicate = categoryPredicate;
-        };
-        
-        do {
-            itemArr = try context.fetch(request);
-        } catch {
-            print("Error fetching request, \(error)");
-        };
+    // cRud Read from realm
+    func loadItems() {
+            
+        todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true);
         
         tableView.reloadData();
     };
@@ -146,18 +140,11 @@ extension TodoListViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
-        let request : NSFetchRequest<Item> = Item.fetchRequest();
+        // filter the title of items based on the predicate that contains specific letters and sort it by date
+        todoItems = todoItems?.filter("title CONTAINS[cd] %@" , searchBar.text!).sorted(byKeyPath: "date", ascending: true);
         
-        // %@ object’s attribute name is equal to value passed in
-        // cd means case and diacritic, so string comparisons will become insensitive
-        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!);
-
-        // sortDes expect an arr
-        // title will be organized alphabetical order
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)];
+        tableView.reloadData();
         
-        // external with param
-        loadItems(with: request, predicate: predicate);
     };
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {

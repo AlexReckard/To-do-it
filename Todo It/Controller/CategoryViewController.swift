@@ -7,15 +7,15 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
 
-    var categories = [Category]();
-
-    // in order to use persistentContainer in this file
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-           
+    let realm = try! Realm();
+    
+    // collection of results
+    var categories : Results<Category>?
+    
     override func viewDidLoad() {
         super.viewDidLoad();
         
@@ -26,16 +26,16 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return categories.count;
+        // nil coalescing operator
+        // if categories is not nil return the count else if it is nil return 1;
+        return categories?.count ?? 1;
     };
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath);
-    
-        let category = categories[indexPath.row];
 
-        cell.textLabel?.text = category.name;
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet";
    
         return cell;
     };
@@ -46,17 +46,8 @@ class CategoryViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         performSegue(withIdentifier: "goToItems", sender: self);
-        
-       // print(categories[indexPath.row])
-    
-       // cruD Delete data from core data has to be in this order
-       // context.delete(categories[indexPath.row]);
-       // categories.remove(at: indexPath.row);
        
-       // crUd update data with core data
-       saveCategories();
-       
-       tableView.deselectRow(at: indexPath, animated: true);
+        tableView.deselectRow(at: indexPath, animated: true);
         
     };
     
@@ -64,7 +55,7 @@ class CategoryViewController: UITableViewController {
         let destinationVC = segue.destination as! TodoListViewController;
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categories[indexPath.row]
+            destinationVC.selectedCategory = categories?[indexPath.row];
         };
     };
     
@@ -79,12 +70,11 @@ class CategoryViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Category", style: .default) {
                (action) in
                
-            let newCategory = Category(context: self.context);
+            let newCategory = Category();
             newCategory.name = textField.text!;
-            self.categories.append(newCategory);
+        
+            self.save(category: newCategory);
             print("Added New Category");
-               
-            self.saveCategories();
         };
            
         alert.addTextField { (alertTextField) in
@@ -100,28 +90,24 @@ class CategoryViewController: UITableViewController {
 
     // MARK: - Data Manipulation
     
-    // Crud Create/save data with core data
-    func saveCategories() {
+    // Crud Create/save data using Realm
+    func save(category : Category) {
        
         do {
-            try context.save();
+            try realm.write {
+                realm.add(category)
+            }
         } catch {
             print("Error saving category, \(error)");
         };
         
-        // must reload data to display the appended arr item on the tableView
         self.tableView.reloadData();
     };
     
-    // cRud Read from core data
-    // internal with param and has a default value = Category.fetchRequest() so we can bypass the param
-    func loadCategories(with request : NSFetchRequest<Category> = Category.fetchRequest()) {
-                
-        do {
-            categories = try context.fetch(request);
-        } catch {
-            print("Error fetching category, \(error)");
-        };
+    // cRud Read using Realm
+    func loadCategories() {
+        
+        categories = realm.objects(Category.self);
         
         tableView.reloadData();
     };
