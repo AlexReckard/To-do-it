@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
 
     let realm = try! Realm();
     
@@ -20,6 +20,8 @@ class CategoryViewController: UITableViewController {
         super.viewDidLoad();
         
         loadCategories();
+        
+        tableView.rowHeight = 60;
     };
     
     // MARK: - TableView DataSource
@@ -32,12 +34,13 @@ class CategoryViewController: UITableViewController {
     };
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath);
-
+        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath);
+        
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet";
-   
+        
         return cell;
+        
     };
     
     
@@ -80,7 +83,7 @@ class CategoryViewController: UITableViewController {
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create New Category";
             textField = alertTextField;
-            alertTextField.autocapitalizationType = .sentences;
+            alertTextField.autocapitalizationType = .words;
             alertTextField.autocorrectionType = .yes;
         };
            
@@ -110,5 +113,20 @@ class CategoryViewController: UITableViewController {
         categories = realm.objects(Category.self);
         
         tableView.reloadData();
+    };
+    
+    // cruD Delete from swipe using realm
+    override func updateModel(at indexPath: IndexPath) {
+        if let categoryDeletion = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write {
+                // cruD delete using realm
+                self.realm.delete(categoryDeletion);
+                print("Category deleted");
+                };
+            } catch {
+                print("Error deleting category, \(error)");
+            };
+        };
     };
 };

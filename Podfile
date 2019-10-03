@@ -6,5 +6,6 @@ target 'Todo It' do
   # Pods for Todo It
 
 pod 'RealmSwift'
+pod 'SwipeCellKit'
 
 end

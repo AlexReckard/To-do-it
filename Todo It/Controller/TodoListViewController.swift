@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController : UITableViewController {
+class TodoListViewController : SwipeTableViewController {
     
     var todoItems : Results<Item>?;
     let realm = try! Realm();
@@ -25,6 +25,8 @@ class TodoListViewController : UITableViewController {
         
         // path to where data is being stored
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask));
+        
+        tableView.rowHeight = 60;
 
     };
     
@@ -37,7 +39,7 @@ class TodoListViewController : UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath);
+        let cell = super.tableView(tableView, cellForRowAt: indexPath);
         
         if let item  = todoItems?[indexPath.row] {
 
@@ -47,6 +49,7 @@ class TodoListViewController : UITableViewController {
         } else {
             cell.textLabel?.text = "No Items Added Yet";
         };
+       
         return cell;
     };
     
@@ -132,6 +135,21 @@ class TodoListViewController : UITableViewController {
         
         tableView.reloadData();
     };
+    
+    // cruD Delete from swipe using realm
+    override func updateModel(at indexPath: IndexPath) {
+        if let itemDeletion = self.todoItems?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    // cruD delete using realm
+                    self.realm.delete(itemDeletion);
+                    print("Item deleted");
+                };
+            } catch {
+                print("Error deleting item, \(error)");
+            };
+        };
+    };
 };
 
     // MARK: - Search Bar
@@ -141,7 +159,7 @@ extension TodoListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
         // filter the title of items based on the predicate that contains specific letters and sort it by date
-        todoItems = todoItems?.filter("title CONTAINS[cd] %@" , searchBar.text!).sorted(byKeyPath: "date", ascending: true);
+        todoItems = todoItems?.filter("title CONTAINS[cd] %@" , searchBar.text!).sorted(byKeyPath: "date", ascending: false);
         
         tableView.reloadData();
         
@@ -160,3 +178,4 @@ extension TodoListViewController: UISearchBarDelegate {
         };
     };
 };
+
