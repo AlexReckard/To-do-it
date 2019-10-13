@@ -39,12 +39,15 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Items" id="LPe-eN-wkh">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="wr5-6W-aR3">
-                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <color key="tintColor" cocoaTouchSystemColor="viewFlipsideBackgroundColor"/>
                             <connections>
                                 <action selector="addButtonPressed:" destination="0n9-DE-mwI" id="PKE-Ak-SQ5"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="searchBar" destination="a4b-Uv-hEb" id="tD4-9h-5aD"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9sj-e0-Md9" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -66,6 +69,7 @@
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="45"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -73,14 +77,17 @@
                             <outlet property="delegate" destination="1oN-pW-3sX" id="nw6-Mi-rlW"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Todo It" id="RL1-cv-10F">
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="Todo It" largeTitleDisplayMode="always" id="RL1-cv-10F">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="5Ef-SJ-qzb">
-                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <inset key="landscapeImageInsets" minX="0.0" minY="0.0" maxX="0.0" maxY="10"/>
+                            <color key="tintColor" cocoaTouchSystemColor="viewFlipsideBackgroundColor"/>
                             <connections>
                                 <action selector="addButtonPressed:" destination="1oN-pW-3sX" id="QkZ-no-Xaz"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <segue destination="0n9-DE-mwI" kind="show" identifier="goToItems" id="0lf-cv-Jxe"/>
                     </connections>
@@ -97,9 +104,11 @@
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="XkY-DM-jbL">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="barTintColor" red="0.20392156859999999" green="0.59607843140000005" blue="0.85882352939999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <textAttributes key="titleTextAttributes">
-                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="30"/>
+                        </textAttributes>
+                        <textAttributes key="largeTitleTextAttributes">
+                            <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
                         </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>

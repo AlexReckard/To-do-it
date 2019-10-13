@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController {
 
@@ -19,9 +20,12 @@ class CategoryViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad();
         
+//        navigationController?.navigationBar.prefersLargeTitles = true;
+        
         loadCategories();
         
         tableView.rowHeight = 60;
+        tableView.separatorStyle = .none;
     };
     
     // MARK: - TableView DataSource
@@ -37,12 +41,19 @@ class CategoryViewController: SwipeTableViewController {
         
         let cell = super.tableView(tableView, cellForRowAt: indexPath);
         
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet";
+        if let category = categories?[indexPath.row] {
+            
+            cell.textLabel?.text = category.name;
+            
+            guard let categoryColor = UIColor(hexString: category.color) else {fatalError()};
+                   
+            cell.backgroundColor = categoryColor;
+            
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true);
+        };
         
         return cell;
-        
     };
-    
     
     // MARK: - TableView Delegate
     
@@ -75,6 +86,7 @@ class CategoryViewController: SwipeTableViewController {
                
             let newCategory = Category();
             newCategory.name = textField.text!;
+            newCategory.color = UIColor.randomFlat().hexValue();
         
             self.save(category: newCategory);
             print("Added New Category");
@@ -83,8 +95,9 @@ class CategoryViewController: SwipeTableViewController {
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create New Category";
             textField = alertTextField;
-            alertTextField.autocapitalizationType = .words;
+            alertTextField.autocapitalizationType = .sentences;
             alertTextField.autocorrectionType = .yes;
+            alertTextField.spellCheckingType = .yes
         };
            
         alert.addAction(action);

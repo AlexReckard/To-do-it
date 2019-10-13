@@ -12,7 +12,7 @@ import RealmSwift
 class Item : Object {
     @objc dynamic var title : String = "";
     @objc dynamic var done : Bool = false;
-    @objc dynamic var date : Date?
+    @objc dynamic var date : Date?;
     // connect the child to the parent
     // Category is the parent and the children are the items
     var parentCategory = LinkingObjects(fromType: Category.self, property: "items")
